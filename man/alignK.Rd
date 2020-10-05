@@ -11,12 +11,12 @@ alignK(qlist, type = "auto")
 
 \item{type}{A character denoting whether clusters must be aligned within K 
 or across K. Select 'auto', 'within' or 'across'. Defaults to 'auto'.}
-}
 
 \item{threshold}{An (optional) positive number controlling the convergence criterion (see label.switching::stephens. Default value: 1e-6.}
 
 \item{maxiter}{An (optional) integer controlling the max number of iterations. Default value: 100}
-
+}
+                                                                                      
 \value{
 A qlist object with clusters switched where necessary.
 }
