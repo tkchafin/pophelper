@@ -53,7 +53,7 @@ alignKStephens <- function(qlist){
 #' @noRd
 #' @keywords internal
 #' 
-alignWithinK <- function(qlist,method="stephens") {
+alignWithinK <- function(qlist,method="stephens", maxiter=100, threshold=1e-6) {
   
   pophelper::is.qlist(qlist)
   # if all runs have same K, align as is
@@ -61,7 +61,7 @@ alignWithinK <- function(qlist,method="stephens") {
     x <- pophelper:::alignKStephens(qlist)
   }else{
     # if runs have different K, split them and align within sublists
-    x <- unlist(lapply(splitQ(qlist),pophelper:::alignKStephens),recursive=FALSE)
+    x <- unlist(lapply(splitQ(qlist),pophelper:::alignKStephens, maxiter=maxiter, threshold=threshold),recursive=FALSE)
     names(x) <- sub("^[0-9]+[\\.]","",names(x)) 
   }
   
@@ -77,12 +77,12 @@ alignWithinK <- function(qlist,method="stephens") {
 #' @noRd
 #' @keywords internal
 #' 
-alignAcrossK <- function(qlist,debug=FALSE) {
+alignAcrossK <- function(qlist,debug=FALSE, maxiter=100, threshold=1e-6) {
   
   pophelper::is.qlist(qlist)
   if(diff(range(as.integer(pophelper::tabulateQ(qlist)$k)))==0) stop("alignAcrossK: All runs belong to a single K.")
   
-  ql <- suppressWarnings(pophelper:::alignWithinK(qlist))
+  ql <- suppressWarnings(pophelper:::alignWithinK(qlist, maxiter=maxiter, threshold=threshold))
   tq <- pophelper::tabulateQ(ql,sorttable=F)
   kvec <- unique(tq$k)
   
@@ -123,7 +123,7 @@ alignAcrossK <- function(qlist,debug=FALSE) {
     if(debug) cat(paste("Cols of runs of q2 after zeroing: ",paste0(sapply(q2,ncol),collapse=","),"\n"))
     
     qx <- c(q1,q2)
-    qx <- suppressWarnings(pophelper:::alignWithinK(qx))
+    qx <- suppressWarnings(pophelper:::alignWithinK(qx, maxiter=maxiter, threshold=threshold))
     
     qx <- lapply(qx,function(x) {
       g <- grep("TEMP", colnames(x))
@@ -162,15 +162,15 @@ alignAcrossK <- function(qlist,debug=FALSE) {
 #' 
 #' @export
 #' 
-alignK <- function(qlist,type="auto") {
+alignK <- function(qlist,type="auto", maxiter=100, threshold=1e-6) {
   pophelper::is.qlist(qlist)
-  if(type=="across") return(pophelper:::alignAcrossK(qlist))
-  if(type=="within") return(pophelper:::alignWithinK(qlist))
+  if(type=="across") return(pophelper:::alignAcrossK(qlist, maxiter=maxiter, threshold=threshold))
+  if(type=="within") return(pophelper:::alignWithinK(qlist, maxiter=maxiter, threshold=threshold))
   if(type=="auto") {
     if(diff(range(as.integer(pophelper::tabulateQ(qlist)$k)))==0) {
-      return(pophelper:::alignWithinK(qlist))
+      return(pophelper:::alignWithinK(qlist, maxiter=maxiter, threshold=threshold))
     } else {
-      return(pophelper:::alignAcrossK(qlist))
+      return(pophelper:::alignAcrossK(qlist, maxiter=maxiter, threshold=threshold))
     }
   }
 }
