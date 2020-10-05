@@ -8,7 +8,7 @@
 #' @noRd
 #' @keywords internal
 #' 
-alignKStephens <- function(qlist){
+alignKStephens <- function(qlist, maxiter=100, threshold=1e-6){
   
   pophelper::is.qlist(qlist)
   # if there is only 1 run, just return it
@@ -25,7 +25,7 @@ alignKStephens <- function(qlist){
     } else {
       qmat <- lapply(qlist,as.matrix)
       p <- aperm(simplify2array(qmat), c(3,1,2))
-      perm <- label.switching::stephens(p)
+      perm <- label.switching::stephens(p, maxiter=maxiter, threshold=threshold)
       
       # reorder and rename columns
       qlist1 <- lapply(seq_len(dim(p)[1]),
